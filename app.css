@@ -1,22 +1,46 @@
 * {
 	font-family: Arial, Helvetica, sans-serif;
 }
-ul {
+table {
 	margin: 0;
 	padding: 0;
 }
-li {
-	list-style: none;
-	margin: 0;
-	padding: 10px;
+tr {
 }
-li.current {
-	background: #def;
+tr.current {
+	background: #cde;
 }
-li span:after {
+th {
+	text-align: left;
+	padding: 5px 20px;
+}
+th:first-child,
+td:first-child {
+	padding-left: 0;
+}
+td {
+	/*border-collapse: collapse;*/
+	/*border-right: 1px solid #ddd;*/
+	padding: 10px 20px;
+}
+td:last-child {
+	border-right: none;
+}
+/*td span:after {
 	content: '|';
 	display: inline-block;
 	padding: 0 10px;
+}*/
+[type=text],
+[type=number] {
+	border: none;
+	border-bottom: 1px solid #ddd;
+	font-size: 16px;
+}
+[type=text]:focus,
+[type=number]:focus {
+    outline: none;
+    border-color: #999;
 }
 [type=text] {
 	width: 100px;
@@ -26,18 +50,18 @@ li span:after {
 }
 
 .video-wrapper {
+	margin-bottom: 60px;
 	position: relative;
 }
 .timeline {
-	 border: 1px solid red;
 	 height: 20px;
 	 position: absolute;
 	 left: 0;
-	 top: 0;
+	 bottom: -20px;
 	 width: 100%;
 }
 .timeline > div {
-	background: #f00;
+	background: #cde;
 	cursor: pointer;
 	height: 100%;
 	position: absolute;
@@ -47,6 +71,6 @@ li span:after {
 	color: #fff;
 	position: absolute;
 	text-shadow: 1px 1px 1px #000;
-	transform: rotate(-40deg);
-	transform-origin: 0 0;
+	transform: rotate(30deg);
+	transform-origin: 0 100%;
 }

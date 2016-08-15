@@ -3,17 +3,12 @@ var app = angular.module('vToolsApp', []);
 app.controller('vToolsController', function($scope, $compile) {
 	var vTools = this,
 		video = document.getElementById('video'),
+		timeline = document.querySelector('.timeline'),
 		videoDuration,
 		currentClip = {},
 		currentIndex = 0;
 
 	vTools.clips = [];
-
-	document.body.addEventListener('keyup', vTools.handleKeypress);
-	video.addEventListener('loadedmetadata', vTools.init);
-	video.addEventListener('pause', function() {
-		console.log('pause');
-	});
 
 	vTools.init = function() {
 		videoDuration = video.duration;
@@ -21,7 +16,7 @@ app.controller('vToolsController', function($scope, $compile) {
 		video.style.height = video.videoHeight + 'px';
 		video.removeEventListener('loadedmetadata', vTools.init);
 
-		document.querySelector('.timeline').style.width = video.videoWidth + 'px';
+		timeline.style.width = video.videoWidth + 'px';
 
 		vTools.clips.push({
 			title: 'Full Video',
@@ -42,7 +37,8 @@ app.controller('vToolsController', function($scope, $compile) {
 		if (localStorage.length > 0) {
 			for (var key in localStorage) {
 				var clipData = JSON.parse(localStorage[key]);
-				console.log(clipData);
+				// console.log(clipData);
+
 				vTools.clips.push({
 					title: clipData.title,
 					start: clipData.start,
@@ -51,33 +47,46 @@ app.controller('vToolsController', function($scope, $compile) {
 			}
 		}
 
-		for (var i = 0; i < vTools.clips.length; i++) {
-			var clip = vTools.clips[i];
-			if (clip.readOnly) {
-				continue;
-			}
-			vTools.createTimelineClip(clip, i);
-		}
+		// for (var i = 0; i < vTools.clips.length; i++) {
+		// 	var clip = vTools.clips[i];
+		// 	if (clip.readOnly) {
+		// 		continue;
+		// 	}
+		// 	vTools.createTimelineClip(clip, i);
+		// }
 
 		$scope.$apply();
 	};
 
 	vTools.handleKeypress = function(_evt) {
-		console.log(_evt.which);
+		// console.log(_evt.which);
+		// console.log($scope)
 		switch(_evt.which) {
 			case 219: 
 				// prev
 				if (currentIndex !== 0) {
-					vTools.playClip(--currentIndex);
+					vTools.playClip(currentIndex - 1);
+					$scope.$apply();
 				}
 				break;
 			case 221: 
 				// next
 				if (currentIndex !== vTools.clips.length - 1) {
-					vTools.playClip(++currentIndex);
+					// alert('calling next with currentIndex ' + (currentIndex + 1));
+					vTools.playClip(currentIndex + 1);
+					$scope.$apply();
 				}
 				break;
 			default:
+		}
+	};
+
+	vTools.getTimelineClipValues = function(_start, _end) {
+		var width = Math.round((_end - _start) / videoDuration * 100);
+		var left = Math.round(_start / videoDuration * 100);
+		return {
+			width: width,
+			left: left
 		}
 	};
 
@@ -88,24 +97,12 @@ app.controller('vToolsController', function($scope, $compile) {
 			alert('Please fill in all fields.');
 			return false;
 		}
+
+		clip.timelineClipWidth = vTools.getTimelineClipValues(clip.start, clip.end).width;
+		clip.timelineClipLeft = vTools.getTimelineClipValues(clip.start, clip.end).left;
+
 		clip.edit = false;
 		return true;
-	};
-
-	vTools.createTimelineClip = function(_clip, _index) {
-		var width = Math.round((_clip.end - _clip.start) / videoDuration * 100);
-		var left = Math.round(_clip.start / videoDuration * 100);
-		var clipTimeline = document.createElement('div');
-		var label = document.createElement('span');
-		label.innerText = _clip.title;
-		clipTimeline.setAttribute('ng-click', 'vTools.playClip(' + _index + ')');
-		clipTimeline.appendChild(label);
-		clipTimeline.style.width = width + '%';
-		clipTimeline.style.left = left + '%';
-		document.querySelector('.timeline').appendChild(clipTimeline);
-
-		// compile to pick up ng-click on new element
-		$compile(clipTimeline)($scope);
 	};
 
 	vTools.removeTimelineClip = function() {
@@ -116,12 +113,17 @@ app.controller('vToolsController', function($scope, $compile) {
 		if (!vTools.checkFields()) {
 			return false;
 		}
+
+		var width = Math.round((vTools.end - vTools.start) / videoDuration * 100);
+		var left = Math.round(vTools.start / videoDuration * 100);
+
 		vTools.clips.push({
 			title: vTools.title,
 			start: vTools.start,
-			end: vTools.end
+			end: vTools.end,
+			timelineClipWidth: vTools.getTimelineClipValues(vTools.start, vTools.end).width,
+			timelineClipLeft: vTools.getTimelineClipValues(vTools.start, vTools.end).left
 		});
-		vTools.createTimelineClip(vTools.clips[vTools.clips.length - 1], vTools.clips.length - 1);
 		vTools.title = vTools.start = vTools.end = '';
 	};
 
@@ -140,6 +142,7 @@ app.controller('vToolsController', function($scope, $compile) {
 	};
 
 	vTools.playClip = function(_index) {
+		// alert('called playClip with _index ' + _index);
 		var clip = vTools.clips[_index],
 			newSrc = video.getAttribute('src');
 		newSrc = newSrc.indexOf('#') === -1 ? newSrc : newSrc.substr(0, newSrc.indexOf('#'));
@@ -156,6 +159,11 @@ app.controller('vToolsController', function($scope, $compile) {
 		alert('Clip saved to localStorage.');
 	}
 
+	document.body.addEventListener('keyup', vTools.handleKeypress);
+	video.addEventListener('loadedmetadata', vTools.init);
+	video.addEventListener('pause', function() {
+		console.log('pause');
+	});
 
 
 /*
@@ -175,6 +183,22 @@ app.controller('vToolsController', function($scope, $compile) {
 				vTools.todos.push(todo);
 			}
 		});
+	};
+
+	vTools.createTimelineClip = function(_clip, _index) {
+		var width = Math.round((_clip.end - _clip.start) / videoDuration * 100);
+		var left = Math.round(_clip.start / videoDuration * 100);
+		var clipTimeline = document.createElement('div');
+		var label = document.createElement('span');
+		label.innerText = '{{clip.title}}';
+		clipTimeline.setAttribute('ng-click', 'vTools.playClip(' + _index + ')');
+		clipTimeline.appendChild(label);
+		clipTimeline.style.width = width + '%';
+		clipTimeline.style.left = left + '%';
+		timeline.appendChild(clipTimeline);
+
+		// compile to pick up ng-click on new element
+		$compile(clipTimeline)($scope);
 	};
 */
 });
