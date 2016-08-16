@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="vToolsApp">
+<html data-ng-app="vToolsApp">
 	<head>
 		<link rel="stylesheet" href="app.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
@@ -7,14 +7,14 @@
 	</head>
 	<body>
 		<h2>vTools</h2>
-		<div ng-controller="vToolsController as vTools">
+		<div data-ng-controller="vToolsController as vTools">
 			<!-- <span>{{vTools.remaining()}} of {{vTools.todos.length}} remaining</span> -->
-			<!-- [ <a href="" ng-click="vTools.archive()">archive</a> ] -->
+			<!-- [ <a href="" data-ng-click="vTools.archive()">archive</a> ] -->
 
 			<div class="video-wrapper">
 				<video src="http://grochtdreis.de/fuer-jsfiddle/video/sintel_trailer-480.mp4" id="video"></video>
 				<div class="timeline">
-					<div ng-repeat="clip in vTools.clips" ng-click="vTools.playClip(clip.id)" ng-show="!clip.readOnly" class="{{clip.isPlaying ? 'current' : ''}}" style="left:{{clip.timelineClipLeft}}%;width:{{clip.timelineClipWidth}}%">
+					<div data-ng-repeat="clip in vTools.clips" data-ng-click="vTools.playClip(clip.id)" data-ng-show="!clip.readOnly" class="{{clip.isPlaying ? 'current' : ''}}" style="left:{{clip.timelineClipLeft}}%;width:{{clip.timelineClipWidth}}%">
 						<span>{{clip.title}}</span>
 					</div>
 				</div>
@@ -34,33 +34,33 @@
 					<th>End time</th>
 					<th>Actions</th>
 				</tr>
-				<tr ng-repeat="clip in vTools.clips" class="{{clip.isPlaying ? 'current' : ''}}">
+				<tr data-ng-repeat="clip in vTools.clips" class="{{clip.isPlaying ? 'current' : ''}}">
 					<!-- <label class="checkbox"> -->
-						<!-- <input type="text" ng-model="todo.done"> -->
+						<!-- <input type="text" data-ng-model="todo.done"> -->
 						<td>
 							<span>{{$index + 1}}</span>
 						</td>
 						<td>
-							<span ng-model="clip.title" ng-show="!clip.edit">{{clip.title}}</span>
-							<input type="text" ng-show="clip.edit" ng-model="clip.title" placeholder="clip title">
+							<span data-ng-model="clip.title" data-ng-show="!clip.edit">{{clip.title}}</span>
+							<input type="text" data-ng-show="clip.edit" data-ng-model="clip.title" placeholder="clip title">
 						</td>
 
 						<td>
-							<span ng-model="clip.start" ng-show="!clip.edit">{{clip.start}}</span>
-							<input type="number" ng-show="clip.edit" ng-model="clip.start" placeholder="start">
+							<span data-ng-model="clip.start" data-ng-show="!clip.edit">{{clip.start}}</span>
+							<input type="number" data-ng-show="clip.edit" data-ng-model="clip.start" placeholder="start">
 						</td>
 
 						<td>
-							<span ng-model="clip.end" ng-show="!clip.edit">{{clip.end}}</span>
-							<input type="number" ng-show="clip.edit" ng-model="clip.end" placeholder="end">
+							<span data-ng-model="clip.end" data-ng-show="!clip.edit">{{clip.end}}</span>
+							<input type="number" data-ng-show="clip.edit" data-ng-model="clip.end" placeholder="end">
 						</td>
 
 						<td>
-							<input type="button" value="play" ng-show="!clip.edit" ng-click="vTools.playClip(clip.id)">
-							<input type="button" value="edit" ng-show="!clip.edit && !clip.readOnly" ng-click="clip.edit = true">
-							<input type="button" value="delete" ng-show="!clip.readOnly && !clip.edit" ng-click="vTools.removeClip(clip.id)">
-							<input type="button" value="save" ng-show="!clip.readOnly && !clip.edit" ng-click="vTools.saveClip(clip.id)">
-							<input type="button" value="OK" ng-show="clip.edit" ng-click="vTools.checkFields(clip.id)">
+							<input type="button" value="play" data-ng-show="!clip.edit" data-ng-click="vTools.playClip(clip.id)">
+							<input type="button" value="edit" data-ng-show="!clip.edit && !clip.readOnly" data-ng-click="clip.edit = true">
+							<input type="button" value="delete" data-ng-show="!clip.readOnly && !clip.edit" data-ng-click="vTools.removeClip(clip.id)">
+							<input type="button" value="save" data-ng-show="!clip.readOnly && !clip.edit" data-ng-click="vTools.saveClip(clip.id)">
+							<input type="button" value="OK" data-ng-show="clip.edit" data-ng-click="vTools.checkFields(clip.id)">
 						</td>	
 					<!-- </label> -->
 				</tr>
@@ -68,10 +68,10 @@
 
 			<h3>Add new clip</h3>
 
-			<form ng-submit="vTools.addClip()">
-				<input type="text" ng-model="vTools.title" placeholder="clip title">
-				<input type="number" ng-model="vTools.start" placeholder="start">
-				<input type="number" ng-model="vTools.end" placeholder="end">
+			<form data-ng-submit="vTools.addClip()">
+				<input type="text" data-ng-model="vTools.title" placeholder="clip title">
+				<input type="number" data-ng-model="vTools.start" placeholder="start">
+				<input type="number" data-ng-model="vTools.end" placeholder="end">
 				<input type="submit" value="add">
 			</form>
 		</div>
