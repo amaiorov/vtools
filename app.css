@@ -10,6 +10,9 @@ tr {
 tr.current {
 	background: #cde;
 }
+tr.current td {
+	border-bottom: 3px solid #789;
+}
 th {
 	text-align: left;
 	padding: 5px 20px;
@@ -21,6 +24,7 @@ td:first-child {
 td {
 	/*border-collapse: collapse;*/
 	/*border-right: 1px solid #ddd;*/
+	border-bottom: 3px solid transparent;
 	padding: 10px 20px;
 }
 td:last-child {
@@ -53,6 +57,27 @@ td:last-child {
 	margin-bottom: 60px;
 	position: relative;
 }
+.video-wrapper:after {
+	background: url(loading.gif) #fff center center no-repeat;
+	content: 'Loading next clip...';
+	display: block;
+	height: 100%;
+	left: 0;
+	opacity: 0;
+	position: absolute;
+	top: 0;
+	transition: opacity 300ms;
+	width: 100%;
+}
+.video-wrapper.loading:after {
+	opacity: 0.5;
+}
+video {
+	transition: opacity 300ms;
+}
+video.loading {
+	opacity: 0.5;
+}
 .timeline {
 	 height: 20px;
 	 position: absolute;
@@ -66,6 +91,9 @@ td:last-child {
 	height: 100%;
 	position: absolute;
 	width: 10%;
+}
+.timeline > div.current {
+	border-bottom: 3px solid #789;
 }
 .timeline > div > span {
 	color: #fff;

@@ -6,65 +6,52 @@ app.controller('vToolsController', function($scope, $compile) {
 		timeline = document.querySelector('.timeline'),
 		videoDuration,
 		currentClip = {},
-		currentIndex = 0;
+		currentIndex = 0,
+		currentId;
 
 	vTools.clips = [];
 
 	vTools.init = function() {
 		videoDuration = video.duration;
-		video.style.width = video.videoWidth + 'px';
+		video.style.width = video.parentElement.style.width = video.videoWidth + 'px';
 		video.style.height = video.videoHeight + 'px';
 		video.removeEventListener('loadedmetadata', vTools.init);
 
 		timeline.style.width = video.videoWidth + 'px';
 
 		vTools.clips.push({
+			id: 'fullvideo',
 			title: 'Full Video',
 			start: 0,
 			end: video.duration,
 			readOnly: true
-		},
-		{
-			title: 'clip 1',
-			start: 1,
-			end: 10
-		},
-		{
-			title: 'clip 2',
-			start: 15,
-			end: 22
 		});
+
 		if (localStorage.length > 0) {
 			for (var key in localStorage) {
 				var clipData = JSON.parse(localStorage[key]);
 				// console.log(clipData);
 
 				vTools.clips.push({
+					id: clipData.id,
 					title: clipData.title,
 					start: clipData.start,
-					end: clipData.end
+					end: clipData.end,
+					timelineClipWidth: vTools.getTimelineClipValues(clipData.start, clipData.end).width,
+					timelineClipLeft: vTools.getTimelineClipValues(clipData.start, clipData.end).left
 				});
 			}
 		}
-
-		// for (var i = 0; i < vTools.clips.length; i++) {
-		// 	var clip = vTools.clips[i];
-		// 	if (clip.readOnly) {
-		// 		continue;
-		// 	}
-		// 	vTools.createTimelineClip(clip, i);
-		// }
 
 		$scope.$apply();
 	};
 
 	vTools.handleKeypress = function(_evt) {
 		// console.log(_evt.which);
-		// console.log($scope)
 		switch(_evt.which) {
 			case 219: 
 				// prev
-				if (currentIndex !== 0) {
+				if (currentIndex > 1) {
 					vTools.playClip(currentIndex - 1);
 					$scope.$apply();
 				}
@@ -72,7 +59,6 @@ app.controller('vToolsController', function($scope, $compile) {
 			case 221: 
 				// next
 				if (currentIndex !== vTools.clips.length - 1) {
-					// alert('calling next with currentIndex ' + (currentIndex + 1));
 					vTools.playClip(currentIndex + 1);
 					$scope.$apply();
 				}
@@ -90,9 +76,18 @@ app.controller('vToolsController', function($scope, $compile) {
 		}
 	};
 
-	vTools.checkFields = function(_index) {
-		var clip = _index ? vTools.clips[_index] : vTools;
-		console.log(clip);
+	vTools.getIndexById = function(_id) {
+		for (var i = 0; i < vTools.clips.length; i++) {
+			if (vTools.clips[i].id === _id) {
+				return i;
+			}
+		}
+
+	}
+
+	vTools.checkFields = function(_id) {
+		var clip = _id ? vTools.clips[vTools.getIndexById(_id)] : vTools;
+
 		if (!clip.title || !clip.start || !clip.end) {
 			alert('Please fill in all fields.');
 			return false;
@@ -105,19 +100,15 @@ app.controller('vToolsController', function($scope, $compile) {
 		return true;
 	};
 
-	vTools.removeTimelineClip = function() {
-
-	};
-
 	vTools.addClip = function() {
 		if (!vTools.checkFields()) {
 			return false;
 		}
 
-		var width = Math.round((vTools.end - vTools.start) / videoDuration * 100);
-		var left = Math.round(vTools.start / videoDuration * 100);
+		var newId = Math.random().toString(16).substring(2);
 
 		vTools.clips.push({
+			id: newId,
 			title: vTools.title,
 			start: vTools.start,
 			end: vTools.end,
@@ -127,46 +118,83 @@ app.controller('vToolsController', function($scope, $compile) {
 		vTools.title = vTools.start = vTools.end = '';
 	};
 
-	vTools.editClip = function(_index, _newTitle, _newStart, _newEnd) {
-		vTools.clips[_index].title = _newTitle;
-		vTools.clips[_index].start = _newStart;
-		vTools.clips[_index].end = _newEnd;
-		vTools.clips[_index].edit = false;
+	vTools.editClip = function(_id, _newTitle, _newStart, _newEnd) {
+		vTools.clips[_id].title = _newTitle;
+		vTools.clips[_id].start = _newStart;
+		vTools.clips[_id].end = _newEnd;
+		vTools.clips[_id].edit = false;
 	};
 
-	vTools.removeClip = function(_index) {
+	vTools.removeClip = function(_id) {
 		if (confirm('Are you sure you want to delete this clip? It will also be removed from localStorage.')) {
-			vTools.clips.splice(_index, 1);
+			vTools.clips.splice(vTools.getIndexById(_id), 1);
+			localStorage.removeItem(_id);
 		}
-		localStorage.removeItem(_index);
 	};
 
-	vTools.playClip = function(_index) {
-		// alert('called playClip with _index ' + _index);
-		var clip = vTools.clips[_index],
+	vTools.playClip = function(_id) {
+		// alert('called playClip with _id ' + _id);
+		
+		var index = typeof(_id) === 'number' ? _id : vTools.getIndexById(_id),
+			clip = vTools.clips[index],
 			newSrc = video.getAttribute('src');
+			
+		currentId = currentId || _id;
+		currentIndex = currentIndex || index;
 		newSrc = newSrc.indexOf('#') === -1 ? newSrc : newSrc.substr(0, newSrc.indexOf('#'));
 		newSrc += '#t=' + clip.start + ',' + clip.end;
 		video.setAttribute('src', newSrc);
 		video.play();
 		vTools.clips[currentIndex].isPlaying = false;
-		currentIndex = _index;
+		currentIndex = index;
 		vTools.clips[currentIndex].isPlaying = true;
 	};
 
-	vTools.saveClip = function(_index) {
-		localStorage.setItem(_index, JSON.stringify(vTools.clips[_index]));
+	vTools.saveClip = function(_id) {
+		localStorage.setItem(_id, JSON.stringify(vTools.clips[vTools.getIndexById(_id)]));
 		alert('Clip saved to localStorage.');
 	}
 
 	document.body.addEventListener('keyup', vTools.handleKeypress);
 	video.addEventListener('loadedmetadata', vTools.init);
 	video.addEventListener('pause', function() {
-		console.log('pause');
+		if (currentIndex + 1 === vTools.clips.length) {
+			return;
+		}
+		console.log('load next in 3');
+		video.parentElement.classList.add('loading');
+		// alert('play next in 3 sec');
+		window.setTimeout(function() {
+			console.log('load next now');
+			vTools.playClip(currentIndex + 1);
+			video.parentElement.classList.remove('loading');
+		}, 3000);
+		// console.log('pause');
 	});
 
 
 /*
+	vTools.clips.push({
+		title: 'Full Video',
+		start: 0,
+		end: video.duration,
+		readOnly: true
+	},
+	{
+		title: 'clip 1',
+		start: 1,
+		end: 10,
+		timelineClipWidth: 17,
+		timelineClipLeft: 1.9
+	},
+	{
+		title: 'clip 2',
+		start: 15,
+		end: 22,
+		timelineClipWidth: 13,
+		timelineClipLeft: 29.9
+	});
+	
 	vTools.remaining = function() {
 		var count = 0;
 		angular.forEach(vTools.todos, function(todo) {
@@ -183,6 +211,10 @@ app.controller('vToolsController', function($scope, $compile) {
 				vTools.todos.push(todo);
 			}
 		});
+	};
+
+	vTools.removeTimelineClip = function() {
+
 	};
 
 	vTools.createTimelineClip = function(_clip, _index) {
