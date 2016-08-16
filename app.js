@@ -11,6 +11,8 @@ app.controller('vToolsController', function($scope, $compile) {
 
 	vTools.clips = [];
 	vTools.autoAdvance = false;
+	vTools.share = window.location.hash.indexOf('share') > -1 ? true : false;
+	vTools.hash = window.location.hash.substr(1);
 
 /**
  * set up DOM and model values
@@ -23,28 +25,33 @@ app.controller('vToolsController', function($scope, $compile) {
 		video.removeEventListener('loadedmetadata', vTools.init);
 		timeline.style.width = video.videoWidth + 'px';
 
-		// manually add full video as first item to clip collection
-		vTools.clips.push({
-			id: 'fullvideo',
-			title: 'Full Video',
-			start: 0,
-			end: video.duration,
-			readOnly: true
-		});
+		if (vTools.share) {
+			// this is a share link - we have a plalist in the hash, so decode and set it
+			vTools.clips = JSON.parse(atob(vTools.hash.split('share/')[1]))
+		} else {
+			// manually add full video as first item to clip collection
+			vTools.clips.push({
+				id: 'fullvideo',
+				title: 'Full Video',
+				start: 0,
+				end: video.duration,
+				readOnly: true
+			});
 
-		// if clips exist in localStorage, iterate and add to main collection
-		if (localStorage.length > 0) {
-			for (var key in localStorage) {
-				var clipData = JSON.parse(localStorage[key]);
+			// if clips exist in localStorage, iterate and add to main collection
+			if (localStorage.length > 0) {
+				for (var key in localStorage) {
+					var clipData = JSON.parse(localStorage[key]);
 
-				vTools.clips.push({
-					id: clipData.id,
-					title: clipData.title,
-					start: clipData.start,
-					end: clipData.end,
-					timelineClipWidth: vTools.getTimelineClipValues(clipData.start, clipData.end).width,
-					timelineClipLeft: vTools.getTimelineClipValues(clipData.start, clipData.end).left
-				});
+					vTools.clips.push({
+						id: clipData.id,
+						title: clipData.title,
+						start: clipData.start,
+						end: clipData.end,
+						timelineClipWidth: vTools.getTimelineClipValues(clipData.start, clipData.end).width,
+						timelineClipLeft: vTools.getTimelineClipValues(clipData.start, clipData.end).left
+					});
+				}
 			}
 		}
 
@@ -57,7 +64,12 @@ app.controller('vToolsController', function($scope, $compile) {
  * @param {object} _evt
  */
 	vTools.handleKeyup = function(_evt) {
+		// console.log(_evt.which)
 		switch(_evt.which) {
+			case 80:
+				// create playlist permalink
+				vTools.createPlaylistPermalink();
+				break;
 			case 65:
 				// toggle auto advance
 				vTools.autoAdvance = vTools.autoAdvance ? false : true;
@@ -211,7 +223,15 @@ app.controller('vToolsController', function($scope, $compile) {
 	vTools.saveClip = function(_id) {
 		localStorage.setItem(_id, JSON.stringify(vTools.clips[vTools.getIndexById(_id)]));
 		alert('Clip saved to localStorage.');
-	}
+	};
+
+
+	vTools.createPlaylistPermalink = function() {
+		// encode current playlist data and open in new window
+		var encodedPlaylist = btoa(JSON.stringify(vTools.clips));
+		window.open('#share/' + encodedPlaylist, '_blank');
+
+	};
 
 	// event listeners
 	document.body.addEventListener('keyup', vTools.handleKeyup);
@@ -238,4 +258,5 @@ app.controller('vToolsController', function($scope, $compile) {
 			video.parentElement.classList.remove('loading');
 		}, 3000);
 	});
+
 });

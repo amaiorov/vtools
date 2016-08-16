@@ -23,3 +23,4 @@ Specify title, the start time and end time (in seconds).
 * **[** - skip to the previous clip in the playlist
 * **]** - skip to the next clip in the playlist
 * **a** - toggle auto-advance; when turned on the next clip will play after the current clip finishes
+* **p** - open permalink to current playlist in new tab
