@@ -6,10 +6,10 @@ app.controller('vToolsController', function($scope, $compile) {
 		timeline = document.querySelector('.timeline'),
 		videoDuration,
 		currentClip = {},
-		currentIndex = 0,
-		currentId;
+		currentIndex = 0;
 
 	vTools.clips = [];
+	vTools.autoAdvance = false;
 
 	vTools.init = function() {
 		videoDuration = video.duration;
@@ -49,6 +49,10 @@ app.controller('vToolsController', function($scope, $compile) {
 	vTools.handleKeypress = function(_evt) {
 		// console.log(_evt.which);
 		switch(_evt.which) {
+			case 65:
+				vTools.autoAdvance = vTools.autoAdvance ? false : true;
+				$scope.$apply();
+				break;
 			case 219: 
 				// prev
 				if (currentIndex > 1) {
@@ -139,7 +143,6 @@ app.controller('vToolsController', function($scope, $compile) {
 			clip = vTools.clips[index],
 			newSrc = video.getAttribute('src');
 			
-		currentId = currentId || _id;
 		currentIndex = currentIndex || index;
 		newSrc = newSrc.indexOf('#') === -1 ? newSrc : newSrc.substr(0, newSrc.indexOf('#'));
 		newSrc += '#t=' + clip.start + ',' + clip.end;
@@ -158,15 +161,18 @@ app.controller('vToolsController', function($scope, $compile) {
 	document.body.addEventListener('keyup', vTools.handleKeypress);
 	video.addEventListener('loadedmetadata', vTools.init);
 	video.addEventListener('pause', function() {
-		if (currentIndex + 1 === vTools.clips.length) {
+		vTools.clips[currentIndex].isPlaying = false;
+		$scope.$apply();
+		if (currentIndex + 1 === vTools.clips.length || !vTools.autoAdvance) {
 			return;
 		}
-		console.log('load next in 3');
+		console.log('loading next in 3');
 		video.parentElement.classList.add('loading');
 		// alert('play next in 3 sec');
 		window.setTimeout(function() {
-			console.log('load next now');
+			console.log('loading next now');
 			vTools.playClip(currentIndex + 1);
+			$scope.$apply();
 			video.parentElement.classList.remove('loading');
 		}, 3000);
 		// console.log('pause');
