@@ -3,6 +3,8 @@
 }
 .legend {
 	font-size: 12px;
+	position: relative;
+	top: -10px;
 }
 .legend > span {
 	background: #eee;
@@ -14,13 +16,15 @@ table {
 	margin: 0;
 	padding: 0;
 }
-tr {
+tr,
+td {
+	transition: all 300ms;
 }
 tr.current {
 	background: #cde;
 }
 tr.current td {
-	border-bottom: 3px solid #789;
+	border-top: 3px solid #789;
 }
 th {
 	text-align: left;
@@ -33,7 +37,7 @@ td:first-child {
 td {
 	/*border-collapse: collapse;*/
 	/*border-right: 1px solid #ddd;*/
-	border-bottom: 3px solid transparent;
+	border-top: 3px solid transparent;
 	padding: 10px 20px;
 }
 td:last-child {
@@ -99,13 +103,15 @@ video.loading {
 }
 .timeline > div {
 	background: #cde;
+	border-top: 3px solid transparent;
 	cursor: pointer;
 	height: 100%;
 	position: absolute;
 	width: 10%;
+	transition: all 300ms;
 }
 .timeline > div.current {
-	border-bottom: 3px solid #789;
+	border-top: 3px solid #789;
 }
 .timeline > div > span {
 	color: #fff;
