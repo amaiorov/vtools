@@ -4,7 +4,9 @@
 .legend {
 	font-size: 12px;
 	position: relative;
-	top: -10px;
+	/*top: -10px;*/
+	font-weight: normal;
+	left: 10px;
 }
 .legend > span {
 	background: #eee;
